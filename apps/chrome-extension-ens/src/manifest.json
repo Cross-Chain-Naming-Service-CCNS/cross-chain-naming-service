@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "ENS Walrus Resolver",
+  "version": "1.0.0",
+  "description": "Resolves ENS domains with Walrus content hashes",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "https://mainnet.infura.io/*",
+    "https://*.stablerecruit.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.eth/*", "*://*.eth"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

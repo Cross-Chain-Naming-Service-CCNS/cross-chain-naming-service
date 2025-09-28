@@ -1,0 +1,19 @@
+{
+  "name": "@repo/chrome-extension-ens",
+  "private": true,
+  "version": "1.0.0",
+  "description": "ENS Walrus content hash resolver Chrome extension",
+  "scripts": {
+    "build": "node -r dotenv/config build.js",
+    "copy-manifest": "cp src/manifest.json dist/",
+    "dev": "npm run build",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.254",
+    "typescript": "^5.0.0",
+    "@repo/typescript-config": "workspace:*",
+    "dotenv": "^16.0.0"
+  }
+}
