@@ -9,8 +9,8 @@ app.use("*", async (req, res) => {
   const hostname = req.hostname;
   let ensName = "";
 
-  if (hostname.includes(".walrusens.com")) {
-    ensName = hostname.split(".walrusens.com")[0];
+  if (hostname.includes(".ccns.live")) {
+    ensName = hostname.split(".ccns.live")[0];
   } else {
     ensName = req.path.split("/")[1];
   }

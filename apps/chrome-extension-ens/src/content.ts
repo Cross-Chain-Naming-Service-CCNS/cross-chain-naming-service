@@ -1,76 +1,5 @@
-interface InfuraResponse {
-  jsonrpc: string;
-  id: number;
-  result: string;
-}
-
-interface ENSCallParams {
-  to: string;
-  data: string;
-}
-
-const INFURA_URL =
-  "https://mainnet.infura.io/v3/be8624a1718b4e8ea027b9de83e0b42d";
-const ENS_REGISTRY = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
-
-async function makeInfuraCall(params: ENSCallParams): Promise<string> {
-  const response = await fetch(INFURA_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "eth_call",
-      params: [params],
-      id: 1,
-    }),
-  });
-
-  const data: InfuraResponse = await response.json();
-  return data.result;
-}
-
-// Simplified namehash implementation - for a production extension, use a proper keccak256 library
-function stringToBytes32(str: string): string {
-  const encoder = new TextEncoder();
-  const bytes = encoder.encode(str);
-  const hex = Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return hex.padEnd(64, "0");
-}
-
-// Simple namehash implementation (this is a simplified version for demo)
-function namehash(name: string): string {
-  if (name === "" || name === ".") {
-    return "0000000000000000000000000000000000000000000000000000000000000000";
-  }
-
-  // For a real implementation, this should use proper keccak256 hashing
-  // This is a simplified version that creates a deterministic hash from the name
-  const normalized = name.toLowerCase();
-  const labels = normalized.split(".");
-
-  // Create a simple hash by concatenating label hashes
-  let hash = "";
-  for (let i = labels.length - 1; i >= 0; i--) {
-    const label = labels[i];
-    const labelHash = stringToBytes32(label);
-    // Simple concatenation and truncation (not cryptographically secure)
-    hash = (hash + labelHash).substring(0, 64);
-  }
-
-  return hash.padEnd(64, "0");
-}
-
-function hexToString(hex: string): string {
-  let str = "";
-  for (let i = 0; i < hex.length; i += 2) {
-    const code = parseInt(hex.substr(i, 2), 16);
-    if (code === 0) break;
-    str += String.fromCharCode(code);
-  }
-  return str;
-}
+import { getRawContentHash } from './getRawContentHash';
+import { idToBase36 } from './objectIdToSiteId';
 
 function createIframe(url: string, ensName: string): void {
   document.documentElement.innerHTML = `
@@ -99,49 +28,10 @@ async function resolveENSName(ensName: string): Promise<void> {
 
     console.log("Resolving ENS:", ensName);
 
-    // Get proper namehash
-    const nameHash = namehash(ensName);
-    console.log("Namehash:", nameHash);
+    // Get raw content hash using the imported function
+    const rawContentHash = await getRawContentHash(ensName);
 
-    // The hash is already without 0x prefix
-    const hashWithoutPrefix = nameHash;
-
-    // Get ENS resolver address
-    const resolverResult = await makeInfuraCall({
-      to: ENS_REGISTRY,
-      data: "0x0178b8bf" + hashWithoutPrefix,
-    });
-
-    if (
-      !resolverResult ||
-      resolverResult === "0x" ||
-      resolverResult ===
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
-    ) {
-      console.log("No resolver found for", ensName);
-      chrome.runtime.sendMessage({
-        type: "ENS_RESOLUTION_ERROR",
-        domain: ensName,
-        error: "No resolver found",
-      });
-      return;
-    }
-
-    const resolverAddress = "0x" + resolverResult.slice(-40);
-    console.log("Resolver address:", resolverAddress);
-
-    // Get content hash from resolver
-    const contentResult = await makeInfuraCall({
-      to: resolverAddress,
-      data: "0xbc1c58d1" + hashWithoutPrefix,
-    });
-
-    if (
-      !contentResult ||
-      contentResult === "0x" ||
-      contentResult ===
-        "0x0000000000000000000000000000000000000000000000000000000000000000"
-    ) {
+    if (!rawContentHash) {
       console.log("No content hash found for", ensName);
       chrome.runtime.sendMessage({
         type: "ENS_RESOLUTION_ERROR",
@@ -151,24 +41,15 @@ async function resolveENSName(ensName: string): Promise<void> {
       return;
     }
 
-    console.log("Content hash:", contentResult);
+    console.log("Raw content hash:", rawContentHash);
 
-    // Parse the content hash result
-    const decoded = hexToString(contentResult.slice(2));
-    if (!decoded.startsWith("walrus://0x")) {
-      console.log("Not a Walrus hash for", ensName);
-      chrome.runtime.sendMessage({
-        type: "ENS_RESOLUTION_ERROR",
-        domain: ensName,
-        error: "Not a Walrus content hash",
-      });
-      return;
-    }
-
-    const hexValue = decoded.substring(11);
-    const base36Value = BigInt("0x" + hexValue).toString(36);
+    // Convert the content hash to base36 using the imported function
+    // Remove '0x' prefix if present before passing to idToBase36
+    const cleanHash = rawContentHash.startsWith('0x') ? rawContentHash.slice(2) : rawContentHash;
+    const base36Value = idToBase36(cleanHash);
     const targetUrl = `https://${base36Value}.stablerecruit.com/`;
 
+    console.log("Converted to base36:", base36Value);
     console.log("Redirecting to:", targetUrl);
 
     // Notify background script of successful resolution
@@ -208,7 +89,7 @@ async function resolveENSName(ensName: string): Promise<void> {
 })();
 
 // Listen for messages from background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "ENS_DOMAIN_DETECTED") {
     console.log("Background script detected ENS domain:", message.domain);
     // Re-resolve if needed

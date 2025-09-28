@@ -47,7 +47,8 @@ export function idToBase36(id_long: string | Buffer): string {
 
     return bytesToBase36(bytes);
   } catch (error) {
-    throw new Error(`Failed to convert to Base36: ${error.message}`);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to convert to Base36: ${errorMessage}`);
   }
 }
 
