@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
   "name": "ENS Walrus Resolver",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Resolves ENS domains with Walrus content hashes",
-  "permissions": ["activeTab", "storage", "tabs"],
+  "permissions": ["activeTab", "storage", "tabs", "webNavigation"],
   "host_permissions": [
     "https://mainnet.infura.io/*",
+    "https://sepolia.infura.io/*",
     "https://*.stablerecruit.com/*",
     "*://*.eth/*"
   ],
