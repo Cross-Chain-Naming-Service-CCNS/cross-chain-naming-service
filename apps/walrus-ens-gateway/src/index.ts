@@ -1,10 +1,14 @@
 import express from "express";
+import { getRawContentHash } from "./getRawContentHash";
+import { idToBase36 } from "./objectIdToSiteId";
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const PORTAL_URL = "https://stablerecruit.com"; // Your portal URL
 
-app.use("*", async (req, res) => {
+app.use("/:id", async (req, res, next) => {
+  // Ignore requests for favicon.ico
+
   // Extract ENS from subdomain or path
   const hostname = req.hostname;
   let ensName = "";
@@ -12,8 +16,12 @@ app.use("*", async (req, res) => {
   if (hostname.includes(".ccns.live")) {
     ensName = hostname.split(".ccns.live")[0];
   } else {
-    ensName = req.path.split("/")[1];
+    // req.path does not include the full original URL, so use req.originalUrl instead
+    ensName = req.originalUrl.split("/")[1];
   }
+
+  console.log(req.originalUrl);
+  console.log("Requested ENS:", ensName);
 
   if (!ensName) {
     return res
@@ -23,12 +31,17 @@ app.use("*", async (req, res) => {
 
   try {
     const siteId = await resolveENSToWalrusSiteId(ensName);
+
     if (!siteId) {
       return res.status(404).send("No Walrus site found");
     }
 
+    console.log("Resolved siteId:", siteId);
+
     // Proxy to your portal
     const portalUrl = `https://${siteId}.stablerecruit.com${req.path}${req.url.includes("?") ? "?" + req.url.split("?")[1] : ""}`;
+
+    console.log(portalUrl);
 
     const response = await fetch(portalUrl, {
       method: req.method,
@@ -55,11 +68,16 @@ async function resolveENSToWalrusSiteId(
   ensName: string
 ): Promise<string | null> {
   // Your existing logic
-  if (true) {
-    return "3x8fmq6n5ndy0ebk8xvd3pdqyjcnepg8qu7k3raidy71aw5w4l";
-  }
+  const contentHash = await getRawContentHash(ensName);
+  const siteId = idToBase36(
+    contentHash
+      ? contentHash.startsWith("0x")
+        ? contentHash.slice(2)
+        : contentHash
+      : ""
+  );
 
-  return null;
+  return siteId;
 }
 
 app.listen(PORT, () => {
