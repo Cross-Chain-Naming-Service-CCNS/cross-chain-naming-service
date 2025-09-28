@@ -10,6 +10,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@ensdomains/content-hash": "^3.0.0",
     "ethers": "^6.15.0"
   }
 }

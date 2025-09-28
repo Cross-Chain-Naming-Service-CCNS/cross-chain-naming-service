@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { decode } from "@ensdomains/content-hash";
 
 // ABI for the ENS resolver's contenthash function
 const resolverAbi = [
@@ -10,7 +11,7 @@ async function getRawContentHash(ensName: string): Promise<string | null> {
   try {
     // Connect to Sepolia testnet provider (replace with your provider URL)
     const provider = new ethers.JsonRpcProvider(
-      "https://sepolia.infura.io/v3/"
+      "https://sepolia.infura.io/v3/8d9cdf256fc745a197843c384e55fd1c"
     );
 
     // Normalize the ENS name to get its node hash
@@ -32,6 +33,10 @@ async function getRawContentHash(ensName: string): Promise<string | null> {
 
     // Call the contenthash function directly with the node hash
     const rawContentHash = await resolverContract.contenthash(node);
+
+    console.log("----------");
+
+    console.log(rawContentHash);
 
     if (!rawContentHash || rawContentHash === "0x") {
       console.log(`No contentHash set for ENS name: ${ensName} on Sepolia`);
@@ -58,8 +63,7 @@ async function getRawContentHash(ensName: string): Promise<string | null> {
   if (rawContentHash) {
     try {
       // Try decoding with @ensdomains/content-hash
-      const contentHash = require("@ensdomains/content-hash");
-      const decoded = contentHash.decode(rawContentHash);
+      const decoded = decode(rawContentHash);
       console.log("Decoded contentHash:", decoded);
     } catch (decodeError) {
       console.log("Failed to decode contentHash:", decodeError.message);
@@ -67,3 +71,5 @@ async function getRawContentHash(ensName: string): Promise<string | null> {
     }
   }
 })();
+
+// 0x90b2d6059d67eeabaf2cb97d3f32bbdf4711e14aa6491f93bbb8f3784b1bdb97632b89e5

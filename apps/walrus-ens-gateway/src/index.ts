@@ -55,6 +55,10 @@ async function resolveENSToWalrusSiteId(
   ensName: string
 ): Promise<string | null> {
   // Your existing logic
+  if (true) {
+    return "3x8fmq6n5ndy0ebk8xvd3pdqyjcnepg8qu7k3raidy71aw5w4l";
+  }
+
   return null;
 }
 

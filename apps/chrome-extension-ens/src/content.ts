@@ -9,7 +9,8 @@ interface ENSCallParams {
   data: string;
 }
 
-const INFURA_URL = "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID";
+const INFURA_URL =
+  "https://mainnet.infura.io/v3/be8624a1718b4e8ea027b9de83e0b42d";
 const ENS_REGISTRY = "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e";
 
 async function makeInfuraCall(params: ENSCallParams): Promise<string> {
@@ -62,10 +63,16 @@ function createIframe(url: string, ensName: string): void {
 }
 
 (async function resolveENS(): Promise<void> {
+  chrome.runtime.sendMessage({ greeting: "hello from content script" });
+
+  console.log("Hello");
+
   const ensName = window.location.hostname.replace(/^www\./, "");
   if (!ensName.endsWith(".eth")) return;
 
   console.log("Resolving ENS:", ensName);
+
+  console.log(ensName);
 
   try {
     // Get ENS resolver address
@@ -74,6 +81,8 @@ function createIframe(url: string, ensName: string): void {
       .reverse()
       .map((label) => stringToHex(label).padStart(64, "0"))
       .join("");
+
+    console.log(namehash);
 
     const resolverResult = await makeInfuraCall({
       to: ENS_REGISTRY,

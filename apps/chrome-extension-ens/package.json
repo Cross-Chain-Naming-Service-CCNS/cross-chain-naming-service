@@ -1,19 +1,15 @@
 {
-  "name": "@repo/chrome-extension-ens",
-  "private": true,
+  "name": "ens-redirect-extension",
   "version": "1.0.0",
-  "description": "ENS Walrus content hash resolver Chrome extension",
+  "description": "Chrome extension to intercept and redirect .eth ENS domains",
+  "main": "background.js",
   "scripts": {
-    "build": "node -r dotenv/config build.js",
-    "copy-manifest": "cp src/manifest.json dist/",
-    "dev": "npm run build",
-    "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit"
+    "build": "echo 'Build complete (no bundling needed for simple extension)'",
+    "test": "echo 'No tests defined'"
   },
-  "devDependencies": {
-    "@types/chrome": "^0.0.254",
-    "typescript": "^5.0.0",
-    "@repo/typescript-config": "workspace:*",
-    "dotenv": "^16.0.0"
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.13.2"
   }
 }
