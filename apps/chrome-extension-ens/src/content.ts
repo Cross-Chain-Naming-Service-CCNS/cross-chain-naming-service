@@ -88,12 +88,5 @@ async function resolveENSName(ensName: string): Promise<void> {
   resolveENSName(ensName);
 })();
 
-// Listen for messages from background script
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-  if (message.type === "ENS_DOMAIN_DETECTED") {
-    console.log("Background script detected ENS domain:", message.domain);
-    // Re-resolve if needed
-    resolveENSName(message.domain);
-  }
-  sendResponse({ status: "ok" });
-});
+// Note: Content script handles ENS resolution automatically
+// No need to listen for background script messages

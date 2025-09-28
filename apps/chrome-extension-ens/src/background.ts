@@ -6,6 +6,7 @@ chrome.runtime.onInstalled.addListener(() => {
   console.log("ENS Walrus Resolver extension installed or updated");
 });
 
+// Monitor tab updates for logging purposes only
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === "complete" && tab.url) {
     const url = new URL(tab.url);
@@ -13,29 +14,19 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
     // Check if this is an ENS domain
     if (hostname.endsWith(".eth")) {
-      console.log(`Detected ENS domain: ${hostname}`);
-
-      // Wait a moment for content script to be ready, then send message
-      setTimeout(() => {
-        chrome.tabs
-          .sendMessage(tabId, {
-            type: "ENS_DOMAIN_DETECTED",
-            domain: hostname,
-          })
-          .catch((error) => {
-            console.log(`Could not send message to tab ${tabId}:`, error);
-            // Content script will handle ENS resolution automatically
-          });
-      }, 100);
+      console.log(`Detected ENS domain: ${hostname} in tab ${tabId}`);
+      // Content script will handle ENS resolution automatically
     }
   }
 });
 
 // Listen for messages from content scripts
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("Received message from content script:", message);
 
-  if (message.type === "ENS_RESOLUTION_START") {
+  if (message.type === "CONTENT_SCRIPT_READY") {
+    console.log(`Content script ready for tab ${sender.tab?.id}`);
+  } else if (message.type === "ENS_RESOLUTION_START") {
     console.log(`Starting ENS resolution for: ${message.domain}`);
   } else if (message.type === "ENS_RESOLUTION_SUCCESS") {
     console.log(
