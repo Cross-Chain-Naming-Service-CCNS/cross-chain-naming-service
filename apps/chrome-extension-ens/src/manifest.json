@@ -3,13 +3,14 @@
   "name": "ENS Walrus Resolver",
   "version": "1.0.1",
   "description": "Resolves ENS domains with Walrus content hashes",
-  "permissions": ["activeTab", "storage"],
+  "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": [
     "https://mainnet.infura.io/*",
-    "https://*.stablerecruit.com/*"
+    "https://*.stablerecruit.com/*",
+    "*://*.eth/*"
   ],
   "background": {
-    "service_worker": "content.js"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {

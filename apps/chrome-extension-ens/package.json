@@ -1,15 +1,25 @@
 {
   "name": "ens-redirect-extension",
-  "version": "1.0.0",
-  "description": "Chrome extension to intercept and redirect .eth ENS domains",
+  "version": "1.0.1",
+  "description": "Chrome extension to intercept and redirect .eth ENS domains using Walrus content hashes",
   "main": "background.js",
   "scripts": {
-    "build": "echo 'Build complete (no bundling needed for simple extension)'",
+    "build": "node build.js",
+    "compile": "tsc",
+    "copy-manifest": "cp src/manifest.json dist/manifest.json",
+    "clean": "rm -rf dist/*",
+    "dev": "npm run compile && npm run copy-manifest",
     "test": "echo 'No tests defined'"
   },
   "author": "Your Name",
   "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.1.12",
+    "dotenv": "^16.0.0",
+    "typescript": "^5.0.0"
+  },
   "dependencies": {
-    "ethers": "^6.13.2"
+    "@ensdomains/content-hash": "^3.0.0",
+    "ethers": "^6.15.0"
   }
 }

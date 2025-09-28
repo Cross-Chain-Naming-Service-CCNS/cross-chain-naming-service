@@ -23,7 +23,8 @@ export function bytesToBase36(bytes: Buffer): string {
 }
 
 // Main function to convert ObjectID to Base36
-export function idToBase36(id: string | Buffer): string {
+export function idToBase36(id_long: string | Buffer): string {
+  const id = id_long.slice(8);
   try {
     // Convert input to Buffer if it's a hex string
     let bytes: Buffer;

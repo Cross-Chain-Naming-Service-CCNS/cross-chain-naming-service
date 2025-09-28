@@ -7,7 +7,9 @@ const resolverAbi = [
 ];
 
 // Function to get raw contentHash for an ENS name
-async function getRawContentHash(ensName: string): Promise<string | null> {
+export async function getRawContentHash(
+  ensName: string
+): Promise<string | null> {
   try {
     // Connect to Sepolia testnet provider (replace with your provider URL)
     const provider = new ethers.JsonRpcProvider(
@@ -35,8 +37,8 @@ async function getRawContentHash(ensName: string): Promise<string | null> {
     const rawContentHash = await resolverContract.contenthash(node);
 
     console.log("----------");
-
     console.log(rawContentHash);
+    console.log("----------");
 
     if (!rawContentHash || rawContentHash === "0x") {
       console.log(`No contentHash set for ENS name: ${ensName} on Sepolia`);
